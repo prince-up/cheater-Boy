@@ -168,6 +168,14 @@ app.whenReady().then(() => {
     if (mainWindow) mainWindow.setAlwaysOnTop(isAlwaysOnTop);
   });
 
+  ipcMain.on('minimize-window', () => {
+    if (mainWindow) mainWindow.minimize();
+  });
+
+  ipcMain.on('close-window', () => {
+    if (mainWindow) mainWindow.close();
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();

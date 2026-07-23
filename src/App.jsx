@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Copy, X } from 'lucide-react';
+import { Settings, Copy, X, Minus, Terminal } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -208,23 +208,37 @@ function App() {
     setScreenshotData(null);
   };
 
+  const handleMinimize = () => {
+    if (window.require) {
+      const { ipcRenderer } = window.require('electron');
+      ipcRenderer.send('minimize-window');
+    }
+  };
+
+  const handleClose = () => {
+    if (window.require) {
+      const { ipcRenderer } = window.require('electron');
+      ipcRenderer.send('close-window');
+    }
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-black text-white p-4 font-sans select-none relative overflow-hidden rounded-xl border border-gray-800">
+    <div className="flex flex-col h-screen bg-black text-green-500 p-4 font-mono select-none relative overflow-hidden border-2 border-green-900">
       
       {/* Settings Modal */}
       {showSettings && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90" style={{ WebkitAppRegion: 'no-drag' }}>
-          <div className="bg-gray-900 p-6 rounded border border-gray-700 w-96 max-h-[90vh] overflow-y-auto relative">
-            <button onClick={() => setShowSettings(false)} className="absolute top-3 right-3 text-gray-400 hover:text-white">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95" style={{ WebkitAppRegion: 'no-drag' }}>
+          <div className="bg-black p-6 border border-green-700 w-96 max-h-[90vh] overflow-y-auto relative">
+            <button onClick={() => setShowSettings(false)} className="absolute top-3 right-3 text-green-700 hover:text-green-400">
               <X size={20} />
             </button>
-            <h2 className="text-lg font-bold mb-4 text-white">Settings</h2>
+            <h2 className="text-lg font-bold mb-4 text-green-500 uppercase tracking-widest">Settings</h2>
             
             <div className="mb-4">
-              <label className="block text-xs text-gray-400 mb-1">Groq API Key</label>
+              <label className="block text-xs text-green-700 mb-1">Groq API Key</label>
               <input 
                 type="password"
-                className="w-full px-3 py-2 bg-black text-sm border border-gray-700 rounded outline-none focus:border-gray-500 text-white placeholder-gray-600"
+                className="w-full px-3 py-2 bg-black text-sm border border-green-900 outline-none focus:border-green-500 text-green-400 placeholder-green-900"
                 placeholder="gsk_..."
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
@@ -232,9 +246,9 @@ function App() {
             </div>
             
             <div className="mb-4">
-              <label className="block text-xs text-gray-400 mb-1">Your Resume (Text Format)</label>
+              <label className="block text-xs text-green-700 mb-1">Your Resume (Text Format)</label>
               <textarea 
-                className="w-full h-32 px-3 py-2 bg-black text-xs border border-gray-700 rounded outline-none focus:border-gray-500 text-white resize-none"
+                className="w-full h-32 px-3 py-2 bg-black text-xs border border-green-900 outline-none focus:border-green-500 text-green-400 resize-none"
                 placeholder="Paste your resume here..."
                 value={resumeText}
                 onChange={(e) => setResumeText(e.target.value)}
@@ -242,34 +256,34 @@ function App() {
             </div>
             
             <div className="mb-4 flex items-center justify-between">
-              <label className="text-sm text-gray-300">Always On Top</label>
+              <label className="text-sm text-green-600">Always On Top</label>
               <input 
                 type="checkbox" 
-                className="w-4 h-4 accent-brand-purple"
+                className="w-4 h-4 accent-green-500"
                 checked={alwaysOnTop}
                 onChange={(e) => setAlwaysOnTop(e.target.checked)}
               />
             </div>
 
             <div className="mb-4 flex items-center justify-between">
-              <label className="text-sm text-gray-300">Auto Ask AI after OCR</label>
+              <label className="text-sm text-green-600">Auto Ask AI after OCR</label>
               <input 
                 type="checkbox" 
-                className="w-4 h-4 accent-brand-purple"
+                className="w-4 h-4 accent-green-500"
                 checked={autoAsk}
                 onChange={(e) => setAutoAsk(e.target.checked)}
               />
             </div>
 
             <div className="mb-2">
-              <label className="flex justify-between text-sm text-gray-300 mb-1">
+              <label className="flex justify-between text-sm text-green-600 mb-1">
                 <span>Window Opacity</span>
                 <span>{Math.round(opacity * 100)}%</span>
               </label>
               <input 
                 type="range" 
                 min="0.6" max="1.0" step="0.05"
-                className="w-full accent-brand-purple"
+                className="w-full accent-green-500"
                 value={opacity}
                 onChange={(e) => setOpacity(e.target.value)}
               />
@@ -281,19 +295,32 @@ function App() {
       {/* Header */}
       <header className="flex justify-between items-center mb-3 cursor-default" style={{ WebkitAppRegion: 'drag' }}>
         <div className="flex items-center space-x-2">
-          <h1 className="text-xl font-bold text-white tracking-wide">
-            cheaterBoy
+          <Terminal size={18} className="text-green-500" />
+          <h1 className="text-lg font-bold text-green-500 tracking-widest uppercase">
+            cheaterBoy_OS
           </h1>
         </div>
-        <div className="flex space-x-3 items-center" style={{ WebkitAppRegion: 'no-drag' }}>
-          <span className="text-xs text-gray-400 bg-gray-900 px-2 py-1 rounded border border-gray-800">
-            Interview Uses: {interviewCount}
+        <div className="flex space-x-2 items-center" style={{ WebkitAppRegion: 'no-drag' }}>
+          <span className="text-[10px] text-green-700 border border-green-900 px-2 py-1 mr-2">
+            CMD_COUNT: {interviewCount}
           </span>
           <button 
             onClick={() => setShowSettings(true)}
-            className="text-gray-400 hover:text-white transition-colors bg-gray-900 p-1.5 rounded border border-gray-800 hover:bg-gray-800"
+            className="text-green-700 hover:text-green-400 transition-colors p-1"
           >
             <Settings size={16} />
+          </button>
+          <button 
+            onClick={handleMinimize}
+            className="text-green-700 hover:text-green-400 transition-colors p-1"
+          >
+            <Minus size={16} />
+          </button>
+          <button 
+            onClick={handleClose}
+            className="text-green-700 hover:text-red-500 transition-colors p-1"
+          >
+            <X size={16} />
           </button>
         </div>
       </header>
@@ -302,7 +329,7 @@ function App() {
       <div className="flex-1 flex flex-col space-y-3 overflow-hidden mt-2" style={{ WebkitAppRegion: 'no-drag' }}>
         
         {/* Input Area */}
-        <div className="flex flex-col h-1/4 bg-gray-900 rounded p-2 border border-gray-800 focus-within:border-gray-500 transition-all relative">
+        <div className="flex flex-col h-1/4 bg-black p-2 border border-green-900 focus-within:border-green-500 transition-colors relative">
           {screenshotData && (
             <div className="absolute top-2 right-2 border border-gray-600 rounded overflow-hidden h-16 w-auto shadow z-10 group">
               <img src={screenshotData} alt="Captured" className="h-full object-contain bg-black" />
@@ -320,21 +347,21 @@ function App() {
             </div>
           )}
           <textarea
-            className="flex-1 w-full p-2 bg-transparent resize-none outline-none text-sm placeholder-gray-500 no-scrollbar"
-            placeholder="Type your question here, or paste clipboard contents..."
+            className="flex-1 w-full p-2 bg-transparent resize-none outline-none text-sm text-green-500 placeholder-green-900 no-scrollbar"
+            placeholder="root@cheaterBoy:~# enter command or text..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
           />
         </div>
 
         {/* Output Area */}
-        <div className="flex flex-col h-3/4 bg-gray-900 rounded border border-gray-800 overflow-hidden relative">
+        <div className="flex flex-col h-3/4 bg-black border border-green-900 overflow-hidden relative">
           {/* Top Bar of Output */}
-          <div className="bg-black border-b border-gray-800 p-2 flex justify-between items-center">
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">cheaterBoy AI</span>
+          <div className="bg-[#051105] border-b border-green-900 p-1.5 flex justify-between items-center">
+            <span className="text-[10px] text-green-700 uppercase tracking-widest font-bold">root@cheaterBoy:~# output</span>
             <button 
               onClick={handleCopy}
-              className="text-gray-400 hover:text-white transition-colors p-1"
+              className="text-green-700 hover:text-green-400 transition-colors p-1"
               title="Copy Response"
             >
               <Copy size={14} />
@@ -342,14 +369,14 @@ function App() {
           </div>
 
           {isLoading && (
-            <div className="w-full h-1 bg-gray-800">
-              <div className="h-full bg-brand-purple animate-pulse" style={{ width: '100%' }}></div>
+            <div className="w-full h-1 bg-black">
+              <div className="h-full bg-green-500 animate-pulse" style={{ width: '100%' }}></div>
             </div>
           )}
           
           <div className="flex-1 p-4 overflow-y-auto no-scrollbar">
             {outputText && !outputText.startsWith('Screen captured') && !outputText.startsWith('Analyzing...') && !outputText.startsWith('Error') && !outputText.startsWith('Please') ? (
-              <div className="text-sm text-gray-200 select-text prose prose-invert prose-sm max-w-none">
+              <div className="text-sm text-green-400 select-text prose prose-invert prose-sm max-w-none">
                 <ReactMarkdown
                   components={{
                     code({node, inline, className, children, ...props}) {
@@ -364,7 +391,7 @@ function App() {
                           className="rounded-md my-2 text-xs"
                         />
                       ) : (
-                        <code {...props} className="bg-gray-800 px-1 py-0.5 rounded text-brand-light-purple">
+                        <code {...props} className="text-green-300 px-1 py-0.5">
                           {children}
                         </code>
                       )
@@ -375,8 +402,8 @@ function App() {
                 </ReactMarkdown>
               </div>
             ) : (
-              <div className="flex h-full items-center justify-center text-gray-600 text-sm italic">
-                {outputText || 'AI response will appear here...'}
+              <div className="flex h-full items-center justify-center text-green-900 text-sm">
+                {outputText || 'system waiting for input...'}
               </div>
             )}
           </div>
@@ -387,41 +414,41 @@ function App() {
       <div className="mt-4 flex flex-wrap gap-2" style={{ WebkitAppRegion: 'no-drag' }}>
         <button 
           onClick={() => handleCapture('full')}
-          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
+          className="flex-1 bg-black hover:bg-[#051105] text-green-500 py-2 px-2 text-xs font-mono font-bold transition-all border border-green-900 hover:border-green-500"
         >
-          Screen (F1)
+          [SCREEN_F1]
         </button>
         <button 
           onClick={() => handleCapture('region')}
-          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
+          className="flex-1 bg-black hover:bg-[#051105] text-green-500 py-2 px-2 text-xs font-mono font-bold transition-all border border-green-900 hover:border-green-500"
         >
-          Region (F4)
+          [REGION_F4]
         </button>
         <button 
           onClick={() => handleAskAI()}
           disabled={isLoading}
-          className={`flex-1 bg-gray-200 hover:bg-white text-black py-2 px-2 rounded text-xs font-bold transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`flex-1 bg-green-900 hover:bg-green-700 text-black py-2 px-2 text-xs font-mono font-bold transition-all border border-green-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Ask (F3)
+          [EXECUTE_F3]
         </button>
         <button 
           onClick={handlePaste}
-          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
+          className="flex-1 bg-black hover:bg-[#051105] text-green-500 py-2 px-2 text-xs font-mono font-bold transition-all border border-green-900 hover:border-green-500"
         >
-          Paste
+          [PASTE]
         </button>
         <button 
           onClick={handleClear}
-          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
+          className="flex-1 bg-black hover:bg-[#051105] text-green-500 py-2 px-2 text-xs font-mono font-bold transition-all border border-green-900 hover:border-green-500"
         >
-          Clear
+          [CLEAR]
         </button>
       </div>
 
       {/* Footer */}
       <div className="mt-3 text-center w-full">
-        <p className="text-[10px] text-gray-500 tracking-wider uppercase font-medium drop-shadow-sm">
-          developed by prince yadav
+        <p className="text-[10px] text-green-900 tracking-widest uppercase font-mono">
+          system init by prince yadav
         </p>
       </div>
     </div>
