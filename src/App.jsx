@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Copy, X } from 'lucide-react';
+import { Settings, Copy, X, Crown, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -192,7 +192,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-brand-dark text-white p-4 font-sans select-none relative">
+    <div className="flex flex-col h-screen bg-black/50 backdrop-blur-xl text-white p-4 font-sans select-none relative overflow-hidden rounded-xl border border-white/10 shadow-2xl">
       
       {/* Settings Modal */}
       {showSettings && (
@@ -251,16 +251,26 @@ function App() {
       )}
 
       {/* Header */}
-      <header className="flex justify-between items-center mb-2 cursor-default" style={{ WebkitAppRegion: 'drag' }}>
-        <h1 className="text-xl font-bold bg-gradient-to-r from-brand-light-purple to-brand-purple bg-clip-text text-transparent">
-          AI Study Assistant
-        </h1>
+      <header className="flex justify-between items-center mb-3 cursor-default" style={{ WebkitAppRegion: 'drag' }}>
+        <div className="flex items-center space-x-2">
+          <Sparkles className="text-pink-500 animate-pulse" size={20} />
+          <h1 className="text-2xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-md">
+            cheaterBoy
+          </h1>
+        </div>
         <div className="flex space-x-3 items-center" style={{ WebkitAppRegion: 'no-drag' }}>
           <button 
-            onClick={() => setShowSettings(true)}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="flex items-center space-x-1 bg-gradient-to-r from-amber-400 to-orange-500 text-black px-3 py-1.5 rounded-full text-xs font-bold shadow-lg hover:shadow-orange-500/50 hover:scale-105 transition-all"
+            onClick={() => alert("Premium feature coming soon!")}
           >
-            <Settings size={20} />
+            <Crown size={14} />
+            <span>Buy Premium</span>
+          </button>
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="text-gray-300 hover:text-white transition-colors bg-white/10 p-1.5 rounded-full hover:bg-white/20"
+          >
+            <Settings size={18} />
           </button>
         </div>
       </header>
@@ -269,7 +279,7 @@ function App() {
       <div className="flex-1 flex flex-col space-y-3 overflow-hidden mt-2" style={{ WebkitAppRegion: 'no-drag' }}>
         
         {/* Input Area */}
-        <div className="flex flex-col h-1/4 bg-brand-card rounded-xl p-2 shadow-lg border border-gray-800 focus-within:border-brand-purple transition-colors relative">
+        <div className="flex flex-col h-1/4 bg-white/5 rounded-xl p-2 shadow-inner border border-white/10 focus-within:border-pink-500/50 focus-within:bg-white/10 transition-all relative backdrop-blur-md">
           {screenshotData && (
             <div className="absolute top-2 right-2 border border-gray-600 rounded overflow-hidden h-16 w-auto shadow z-10 group">
               <img src={screenshotData} alt="Captured" className="h-full object-contain bg-black" />
@@ -295,10 +305,10 @@ function App() {
         </div>
 
         {/* Output Area */}
-        <div className="flex flex-col h-3/4 bg-brand-card rounded-xl shadow-lg border border-gray-800 overflow-hidden relative">
+        <div className="flex flex-col h-3/4 bg-white/5 rounded-xl shadow-inner border border-white/10 overflow-hidden relative backdrop-blur-md">
           {/* Top Bar of Output */}
-          <div className="bg-gray-900 border-b border-gray-800 p-2 flex justify-between items-center">
-            <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">AI Response</span>
+          <div className="bg-black/40 border-b border-white/10 p-2 flex justify-between items-center backdrop-blur-sm">
+            <span className="text-[10px] text-pink-400 uppercase tracking-widest font-bold">cheaterBoy AI</span>
             <button 
               onClick={handleCopy}
               className="text-gray-400 hover:text-white transition-colors p-1"
@@ -354,35 +364,42 @@ function App() {
       <div className="mt-4 flex flex-wrap gap-2" style={{ WebkitAppRegion: 'no-drag' }}>
         <button 
           onClick={() => handleCapture('full')}
-          className="flex-1 bg-brand-card hover:bg-gray-800 text-gray-300 py-2 px-2 rounded-lg text-xs transition-colors border border-gray-800 shadow"
+          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
         >
           Screen (F1)
         </button>
         <button 
           onClick={() => handleCapture('region')}
-          className="flex-1 bg-brand-card hover:bg-gray-800 text-gray-300 py-2 px-2 rounded-lg text-xs transition-colors border border-gray-800 shadow"
+          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
         >
           Region (F4)
         </button>
         <button 
           onClick={() => handleAskAI()}
           disabled={isLoading}
-          className={`flex-1 bg-gradient-to-r from-brand-purple to-brand-light-purple hover:opacity-90 text-white py-2 px-2 rounded-lg text-xs font-medium transition-opacity shadow ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white py-2.5 px-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-purple-500/30 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
         >
           Ask (F3)
         </button>
         <button 
           onClick={handlePaste}
-          className="flex-1 bg-brand-card hover:bg-gray-800 text-gray-300 py-2 px-2 rounded-lg text-xs transition-colors border border-gray-800 shadow"
+          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
         >
           Paste
         </button>
         <button 
           onClick={handleClear}
-          className="flex-1 bg-brand-card hover:bg-gray-800 text-gray-300 py-2 px-2 rounded-lg text-xs transition-colors border border-gray-800 shadow"
+          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
         >
           Clear
         </button>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-3 text-center w-full">
+        <p className="text-[10px] text-gray-500 tracking-wider uppercase font-medium drop-shadow-sm">
+          developed by prince yadav
+        </p>
       </div>
     </div>
   );

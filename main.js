@@ -9,9 +9,14 @@ function createWindow() {
     height: 800,
     alwaysOnTop: true, // Always on top as requested
     resizable: true,
+    show: false, // Start hidden (invisible) by default
+    skipTaskbar: true, // Hide from the taskbar
+    transparent: true, // Make background transparent
+    frame: false, // Remove window frame
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false // For simplicity in this example to allow IPC from React
+      contextIsolation: false, // For simplicity in this example to allow IPC from React
+      devTools: false // Disabled Developer Tools to prevent hacking
     }
   });
 
@@ -23,8 +28,21 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
   }
 
+  // Prevent window from being captured in screen shares, screenshots, or recordings
+  mainWindow.setContentProtection(true);
+
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+
+  // Prevent opening Developer Tools via shortcuts to avoid hacking
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+      event.preventDefault();
+    }
+    if (input.key === 'F12') {
+      event.preventDefault();
+    }
   });
 }
 
@@ -98,7 +116,8 @@ app.whenReady().then(() => {
         enableLargerThanScreen: true,
         webPreferences: {
           nodeIntegration: true,
-          contextIsolation: false
+          contextIsolation: false,
+          devTools: false
         }
       });
 

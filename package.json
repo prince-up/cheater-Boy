@@ -1,7 +1,7 @@
 {
-  "name": "ai-study-assistant",
+  "name": "cheaterboy",
   "version": "1.0.0",
-  "description": "AI Study Assistant with visible overlay",
+  "description": "cheaterBoy with visible overlay",
   "main": "main.js",
   "scripts": {
     "dev": "vite",
@@ -28,8 +28,8 @@
     "vite": "^4.4.5"
   },
   "build": {
-    "appId": "com.aistudyassistant.app",
-    "productName": "AI Study Assistant",
+    "appId": "com.cheaterboy.app",
+    "productName": "cheaterBoy",
     "directories": {
       "output": "release"
     },
@@ -39,6 +39,10 @@
     "mac": {
       "target": "dmg"
     },
+    "linux": {
+      "target": "AppImage"
+    },
+    "asar": true,
     "files": [
       "dist/**/*",
       "main.js",
