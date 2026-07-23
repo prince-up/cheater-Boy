@@ -1,4 +1,4 @@
-import 'regenerator-runtime/runtime';
+
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { Settings, Copy, X, Minus, Sparkles, Mic, MicOff } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
