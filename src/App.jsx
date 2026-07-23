@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Settings, Copy, X, Minus, Sparkles } from 'lucide-react';
+import 'regenerator-runtime/runtime';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { Settings, Copy, X, Minus, Sparkles, Mic, MicOff } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -20,6 +21,21 @@ function App() {
   const [ocrProgress, setOcrProgress] = useState('');
   const [resumeText, setResumeText] = useState(() => localStorage.getItem('resume_text') || '');
   const [interviewCount, setInterviewCount] = useState(() => parseInt(localStorage.getItem('interview_count')) || 0);
+
+  // Speech Recognition Hook
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
+  
+  // Sync transcript to input text
+  useEffect(() => {
+    if (listening && transcript) {
+      setInputText(transcript);
+    }
+  }, [transcript, listening]);
 
   // Save settings
   useEffect(() => {
@@ -206,6 +222,24 @@ function App() {
     setInputText('');
     setOutputText('');
     setScreenshotData(null);
+    resetTranscript();
+  };
+
+  const handleListen = () => {
+    if (!browserSupportsSpeechRecognition) {
+      setOutputText('Browser doesn\'t support speech recognition in this environment.');
+      return;
+    }
+    
+    if (listening) {
+      SpeechRecognition.stopListening();
+      setOutputText('Stopped listening. Click Ask (F3) to generate an answer.');
+    } else {
+      resetTranscript();
+      setInputText('');
+      SpeechRecognition.startListening({ continuous: true, language: 'en-US' });
+      setOutputText('Listening to microphone... Speak now.');
+    }
   };
 
   const handleMinimize = () => {
@@ -423,6 +457,13 @@ function App() {
           className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all border border-white/10 shadow-sm hover:shadow-md"
         >
           Region (F4)
+        </button>
+        <button 
+          onClick={handleListen}
+          className={`flex-1 flex items-center justify-center space-x-1 py-2.5 px-2 rounded-xl text-xs font-semibold transition-all border shadow-sm hover:shadow-md ${listening ? 'bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30' : 'bg-white/5 hover:bg-white/10 text-gray-300 border-white/10'}`}
+        >
+          {listening ? <MicOff size={14} /> : <Mic size={14} />}
+          <span>{listening ? 'Stop' : 'Listen'}</span>
         </button>
         <button 
           onClick={() => handleAskAI()}
