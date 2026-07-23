@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Copy, X, Crown, Sparkles } from 'lucide-react';
+import { Settings, Copy, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -18,12 +18,16 @@ function App() {
   const [alwaysOnTop, setAlwaysOnTop] = useState(true);
   const [autoAsk, setAutoAsk] = useState(() => localStorage.getItem('auto_ask') === 'true');
   const [ocrProgress, setOcrProgress] = useState('');
+  const [resumeText, setResumeText] = useState(() => localStorage.getItem('resume_text') || '');
+  const [interviewCount, setInterviewCount] = useState(() => parseInt(localStorage.getItem('interview_count')) || 0);
 
   // Save settings
   useEffect(() => {
     localStorage.setItem('groq_api_key', apiKey);
     localStorage.setItem('auto_ask', autoAsk);
-  }, [apiKey, autoAsk]);
+    localStorage.setItem('resume_text', resumeText);
+    localStorage.setItem('interview_count', interviewCount);
+  }, [apiKey, autoAsk, resumeText, interviewCount]);
 
   useEffect(() => {
     if (window.require) {
@@ -132,10 +136,14 @@ function App() {
       const url = `https://api.groq.com/openai/v1/chat/completions`;
       
       const content = [];
-      let promptText = "You are an expert programming tutor and assistant. Analyze the image or text, read the question clearly, and provide a clean, correct solution with explanation.";
+      let promptText = "You are an expert interview assistant. Provide EXTREMELY concise, exact point-to-point answers. Do not output raw data or long explanations. Only output the exact points requested.";
+      
+      if (resumeText) {
+        promptText += `\n\nContext: The user's resume is provided below. Answer any questions keeping this resume in mind. Do not mention the resume unless directly relevant to the answer.\n\nResume:\n${resumeText}`;
+      }
       
       if (textToSend) {
-        promptText += `\nAdditional context/question from user: ${textToSend}`;
+        promptText += `\n\nQuestion/Context from user: ${textToSend}`;
       }
 
       content.push({ type: 'text', text: promptText });
@@ -169,6 +177,7 @@ function App() {
 
       const reply = data.choices?.[0]?.message?.content || 'No response generated.';
       setOutputText(reply);
+      setInterviewCount(prev => prev + 1);
       
     } catch (err) {
       console.error('Groq error:', err);
@@ -200,25 +209,35 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black/50 backdrop-blur-xl text-white p-4 font-sans select-none relative overflow-hidden rounded-xl border border-white/10 shadow-2xl">
+    <div className="flex flex-col h-screen bg-black text-white p-4 font-sans select-none relative overflow-hidden rounded-xl border border-gray-800">
       
       {/* Settings Modal */}
       {showSettings && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" style={{ WebkitAppRegion: 'no-drag' }}>
-          <div className="bg-brand-card p-6 rounded-xl border border-gray-700 w-80 shadow-2xl relative">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90" style={{ WebkitAppRegion: 'no-drag' }}>
+          <div className="bg-gray-900 p-6 rounded border border-gray-700 w-96 max-h-[90vh] overflow-y-auto relative">
             <button onClick={() => setShowSettings(false)} className="absolute top-3 right-3 text-gray-400 hover:text-white">
               <X size={20} />
             </button>
-            <h2 className="text-lg font-bold mb-4 text-brand-light-purple">Settings</h2>
+            <h2 className="text-lg font-bold mb-4 text-white">Settings</h2>
             
             <div className="mb-4">
               <label className="block text-xs text-gray-400 mb-1">Groq API Key</label>
               <input 
                 type="password"
-                className="w-full px-3 py-2 bg-black/40 text-sm border border-gray-700 rounded outline-none focus:border-pink-500 text-white placeholder-gray-600"
+                className="w-full px-3 py-2 bg-black text-sm border border-gray-700 rounded outline-none focus:border-gray-500 text-white placeholder-gray-600"
                 placeholder="gsk_..."
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-xs text-gray-400 mb-1">Your Resume (Text Format)</label>
+              <textarea 
+                className="w-full h-32 px-3 py-2 bg-black text-xs border border-gray-700 rounded outline-none focus:border-gray-500 text-white resize-none"
+                placeholder="Paste your resume here..."
+                value={resumeText}
+                onChange={(e) => setResumeText(e.target.value)}
               />
             </div>
             
@@ -262,24 +281,19 @@ function App() {
       {/* Header */}
       <header className="flex justify-between items-center mb-3 cursor-default" style={{ WebkitAppRegion: 'drag' }}>
         <div className="flex items-center space-x-2">
-          <Sparkles className="text-pink-500 animate-pulse" size={20} />
-          <h1 className="text-2xl font-extrabold bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-md">
+          <h1 className="text-xl font-bold text-white tracking-wide">
             cheaterBoy
           </h1>
         </div>
         <div className="flex space-x-3 items-center" style={{ WebkitAppRegion: 'no-drag' }}>
-          <button 
-            className="flex items-center space-x-1 bg-gradient-to-r from-amber-400 to-orange-500 text-black px-3 py-1.5 rounded-full text-xs font-bold shadow-lg hover:shadow-orange-500/50 hover:scale-105 transition-all"
-            onClick={() => alert("Premium feature coming soon!")}
-          >
-            <Crown size={14} />
-            <span>Buy Premium</span>
-          </button>
+          <span className="text-xs text-gray-400 bg-gray-900 px-2 py-1 rounded border border-gray-800">
+            Interview Uses: {interviewCount}
+          </span>
           <button 
             onClick={() => setShowSettings(true)}
-            className="text-gray-300 hover:text-white transition-colors bg-white/10 p-1.5 rounded-full hover:bg-white/20"
+            className="text-gray-400 hover:text-white transition-colors bg-gray-900 p-1.5 rounded border border-gray-800 hover:bg-gray-800"
           >
-            <Settings size={18} />
+            <Settings size={16} />
           </button>
         </div>
       </header>
@@ -288,7 +302,7 @@ function App() {
       <div className="flex-1 flex flex-col space-y-3 overflow-hidden mt-2" style={{ WebkitAppRegion: 'no-drag' }}>
         
         {/* Input Area */}
-        <div className="flex flex-col h-1/4 bg-white/5 rounded-xl p-2 shadow-inner border border-white/10 focus-within:border-pink-500/50 focus-within:bg-white/10 transition-all relative backdrop-blur-md">
+        <div className="flex flex-col h-1/4 bg-gray-900 rounded p-2 border border-gray-800 focus-within:border-gray-500 transition-all relative">
           {screenshotData && (
             <div className="absolute top-2 right-2 border border-gray-600 rounded overflow-hidden h-16 w-auto shadow z-10 group">
               <img src={screenshotData} alt="Captured" className="h-full object-contain bg-black" />
@@ -314,10 +328,10 @@ function App() {
         </div>
 
         {/* Output Area */}
-        <div className="flex flex-col h-3/4 bg-white/5 rounded-xl shadow-inner border border-white/10 overflow-hidden relative backdrop-blur-md">
+        <div className="flex flex-col h-3/4 bg-gray-900 rounded border border-gray-800 overflow-hidden relative">
           {/* Top Bar of Output */}
-          <div className="bg-black/40 border-b border-white/10 p-2 flex justify-between items-center backdrop-blur-sm">
-            <span className="text-[10px] text-pink-400 uppercase tracking-widest font-bold">cheaterBoy AI</span>
+          <div className="bg-black border-b border-gray-800 p-2 flex justify-between items-center">
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">cheaterBoy AI</span>
             <button 
               onClick={handleCopy}
               className="text-gray-400 hover:text-white transition-colors p-1"
@@ -373,32 +387,32 @@ function App() {
       <div className="mt-4 flex flex-wrap gap-2" style={{ WebkitAppRegion: 'no-drag' }}>
         <button 
           onClick={() => handleCapture('full')}
-          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
+          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
         >
           Screen (F1)
         </button>
         <button 
           onClick={() => handleCapture('region')}
-          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
+          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
         >
           Region (F4)
         </button>
         <button 
           onClick={() => handleAskAI()}
           disabled={isLoading}
-          className={`flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white py-2.5 px-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-purple-500/30 ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
+          className={`flex-1 bg-gray-200 hover:bg-white text-black py-2 px-2 rounded text-xs font-bold transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Ask (F3)
         </button>
         <button 
           onClick={handlePaste}
-          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
+          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
         >
           Paste
         </button>
         <button 
           onClick={handleClear}
-          className="flex-1 bg-white/10 hover:bg-white/20 text-gray-200 py-2.5 px-2 rounded-lg text-xs font-semibold transition-all border border-white/10 shadow hover:shadow-lg backdrop-blur-sm"
+          className="flex-1 bg-gray-900 hover:bg-gray-800 text-gray-300 py-2 px-2 rounded text-xs font-semibold transition-all border border-gray-800"
         >
           Clear
         </button>
