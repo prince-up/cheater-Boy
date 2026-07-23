@@ -6,7 +6,7 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Tesseract from 'tesseract.js';
 
 function App() {
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('groq_api_key') || '');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [screenshotData, setScreenshotData] = useState(null);
@@ -21,7 +21,7 @@ function App() {
 
   // Save settings
   useEffect(() => {
-    localStorage.setItem('gemini_api_key', apiKey);
+    localStorage.setItem('groq_api_key', apiKey);
     localStorage.setItem('auto_ask', autoAsk);
   }, [apiKey, autoAsk]);
 
@@ -113,7 +113,7 @@ function App() {
   const handleAskAI = async (overrideText = null, overrideImage = null) => {
     if (isLoading) return;
     if (!apiKey) {
-      setOutputText('Please enter your Gemini API Key in the settings.');
+      setOutputText('Please enter your Groq API Key in the settings.');
       return;
     }
     
@@ -129,41 +129,49 @@ function App() {
     setOutputText('Analyzing...');
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      const parts = [];
-      parts.push({
-        text: "You are an expert C++ programming tutor. Analyze the image, read the question clearly, and provide clean, correct solution with explanation."
-      });
+      const url = `https://api.groq.com/openai/v1/chat/completions`;
+      
+      const content = [];
+      let promptText = "You are an expert programming tutor and assistant. Analyze the image or text, read the question clearly, and provide a clean, correct solution with explanation.";
       
       if (textToSend) {
-        parts.push({ text: `Additional context/question from user: ${textToSend}` });
+        promptText += `\nAdditional context/question from user: ${textToSend}`;
       }
 
+      content.push({ type: 'text', text: promptText });
+
       if (imageToSend) {
-        const base64Data = imageToSend.split(',')[1];
-        parts.push({
-          inlineData: { mimeType: 'image/png', data: base64Data }
+        content.push({
+          type: 'image_url',
+          image_url: { url: imageToSend }
         });
       }
 
-      const requestBody = { contents: [{ parts }] };
+      const requestBody = { 
+        model: imageToSend ? 'llama-3.2-90b-vision-preview' : 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content }] 
+      };
+
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
         body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to fetch from Gemini');
+        throw new Error(data.error?.message || 'Failed to fetch from Groq');
       }
 
-      const reply = data.candidates[0]?.content?.parts[0]?.text || 'No response generated.';
+      const reply = data.choices?.[0]?.message?.content || 'No response generated.';
       setOutputText(reply);
       
     } catch (err) {
-      console.error('Gemini error:', err);
+      console.error('Groq error:', err);
       setOutputText(`Error: ${err.message}`);
     } finally {
       setIsLoading(false);
@@ -204,10 +212,11 @@ function App() {
             <h2 className="text-lg font-bold mb-4 text-brand-light-purple">Settings</h2>
             
             <div className="mb-4">
-              <label className="block text-xs text-gray-400 mb-1">Gemini API Key</label>
+              <label className="block text-xs text-gray-400 mb-1">Groq API Key</label>
               <input 
                 type="password"
-                className="w-full px-3 py-2 bg-brand-dark text-sm border border-gray-700 rounded outline-none focus:border-brand-purple"
+                className="w-full px-3 py-2 bg-black/40 text-sm border border-gray-700 rounded outline-none focus:border-pink-500 text-white placeholder-gray-600"
+                placeholder="gsk_..."
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
