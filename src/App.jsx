@@ -136,7 +136,7 @@ function App() {
       const url = `https://api.groq.com/openai/v1/chat/completions`;
       
       const content = [];
-      let promptText = "You are an expert interview assistant. Provide EXTREMELY concise, exact point-to-point answers. Do not output raw data or long explanations. Only output the exact points requested.";
+      let promptText = "You are an expert interview assistant helping a candidate in real-time. Provide clear, professional, and well-structured answers suitable for speaking in an interview. Use bullet points for readability. Keep it concise and to the point, avoiding unnecessary fluff, but ensure the answer is comprehensive enough to impress an interviewer.";
       
       if (resumeText) {
         promptText += `\n\nContext: The user's resume is provided below. Answer any questions keeping this resume in mind. Do not mention the resume unless directly relevant to the answer.\n\nResume:\n${resumeText}`;
