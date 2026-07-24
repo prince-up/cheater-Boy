@@ -1,4 +1,4 @@
-# AI Study Assistant
+# CheaterBoy
 
 AI Study Assistant is a modern, lightweight desktop application built to assist students and programmers. It securely captures your screen (or a specific region), automatically extracts text using offline OCR, and uses Google's Gemini AI to provide instant explanations, solutions, and code reviews.
 
